@@ -1,4 +1,12 @@
 apply plugin: 'com.android.library'
+apply plugin: 'maven'
+
+//-------------------------------
+// 1. enter current lib version
+def libVersion = "1.0.0"
+// 2. ./gradlew buildAll
+// 3. ./gradlew bintrayUpload
+//-------------------------------
 
 android {
     compileSdkVersion 25
@@ -8,13 +16,82 @@ android {
         minSdkVersion 1
         targetSdkVersion 25
         versionCode 1
-        versionName "1.0.0"
+        versionName libVersion
     }
 
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            libraryVariants.all { variant ->
+                variant.outputs.each { output ->
+                    def newName = "switchlog-${libVersion}.aar"
+                    output.outputFile = new File(output.outputFile.parent, newName)
+                }
+            }
         }
     }
+}
+
+task generatePom {
+    doLast {
+        pom {
+            project {
+                groupId 'ru.maxost'
+                artifactId 'switchlog'
+                version libVersion
+                packaging 'aar'
+            }
+        }.writeTo("build/outputs/aar/switchlog-${libVersion}.pom")
+    }
+}
+
+task generateSources(type: Jar) {
+    classifier = 'sources'
+    from android.sourceSets.main.java.srcDirs
+    archiveName "switchlog-${libVersion}-sources.jar"
+    destinationDir = file("build/outputs/aar/")
+}
+
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+
+bintray {
+    user = properties.getProperty('bintray.user')
+    key = properties.getProperty('bintray.apikey')
+    filesSpec {
+        from ('switchlog/build/outputs/aar/') {
+            include "switchlog-${libVersion}.aar"
+            include "switchlog-${libVersion}.pom"
+            include "switchlog-${libVersion}-sources.jar"
+        }
+        into "ru/maxost/switchlog/${libVersion}/"
+    }
+
+    publish = true
+
+    pkg {
+        repo = 'maven'
+        name = 'switchlog'
+        userOrg = 'testorg14'
+
+        websiteUrl = 'https://github.com/maxost/switchlog'
+        vcsUrl = 'https://github.com/maxost/switchlog'
+        licenses = ['Apache-2.0']
+        publicDownloadNumbers = true
+
+        version {
+            name = libVersion
+        }
+    }
+}
+
+task buildAll {
+    dependsOn 'clean'
+    dependsOn 'build'
+    dependsOn 'generatePom'
+    dependsOn 'generateSources'
+    tasks.findByName('build').mustRunAfter 'clean'
+    tasks.findByName('generatePom').mustRunAfter 'build'
+    tasks.findByName('generateSources').mustRunAfter 'generatePom'
 }

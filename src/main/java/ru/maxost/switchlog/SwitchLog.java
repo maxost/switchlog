@@ -8,14 +8,14 @@ import java.util.regex.Pattern;
  */
 public class SwitchLog {
 
-    public static final int STATE_OFF = 1;
-    public static final int STATE_ANDROID = 2;
-    public static final int STATE_PURE_JAVA = 3;
+    public static final int METHOD_OFF = 1;
+    public static final int METHOD_ANDROID_LOG = 2;
+    public static final int METHOD_JAVA_PRINT = 3;
 
-    private static int state;
+    private static int method = 1; //off by default
 
-    public static void init(int state) {
-        SwitchLog.state = state;
+    public static void setLogMethod(int method) {
+        SwitchLog.method = method;
     }
 
     public static void log() {
@@ -25,6 +25,11 @@ public class SwitchLog {
     public static void log(String message) {
         displayMessage(message);
     }
+
+    public static void scream() {
+        displayMessage("!!!!!!!!!!!!!!!!!!!!!!!!!");
+    }
+
 
     public static void scream(String message) {
         displayMessage("!!!!!!!!!!!!!!!!!!!!!!!!! " + message);
@@ -40,7 +45,6 @@ public class SwitchLog {
         Matcher m = Pattern.compile("(\\$\\d+)+$").matcher(className);
         if (m.find()) className = m.replaceAll("");
         return new StringBuilder()
-                .append("------------------------- ")
                 .append(className.substring(className.lastIndexOf('.') + 1))
                 .append(" :: ")
                 .append(stackTrace[CALL_STACK_INDEX].getMethodName())
@@ -48,15 +52,15 @@ public class SwitchLog {
     }
 
     private static void displayMessage(String message) {
-        switch (state) {
-            case STATE_OFF : {
+        switch (method) {
+            case METHOD_OFF : {
                 break;
             }
-            case STATE_ANDROID : {
+            case METHOD_ANDROID_LOG : {
                 android.util.Log.d(generateTag(), message);
                 break;
             }
-            case STATE_PURE_JAVA: {
+            case METHOD_JAVA_PRINT: {
                 System.out.println(generateTag() + ": " + message);
                 break;
             }

@@ -3,7 +3,7 @@ apply plugin: 'maven'
 
 //-------------------------------
 // 1. enter current lib version
-def libVersion = "1.0.0"
+def libVersion = "2.0.1"
 // 2. ./gradlew buildAll
 // 3. ./gradlew bintrayUpload
 //-------------------------------

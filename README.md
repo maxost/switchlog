@@ -1,18 +1,30 @@
 # SwitchLog
-Simple Android logger with the possibility of replacing log method.
+Simple Android logger with the possibility of replacing logging method. Also detects and prints class::method that calls the logging method.
 ## Installation
-Available at JCenter. Add to your `build.gradle` file:
+Available at JCenter. Add to your project dependencies:
 
-    compile 'ru.maxost:switchlog:1.0.0'
+    compile 'ru.maxost:switchlog:2.0.1'
 ## Usage
-Init logger first (e.g. in your `Application` class):
+Set logger method first (e.g. in your `Application` class):
 
-    SwitchLog.init(STATE);
+    SwitchLog.setMethod(METHOD);
 
-`STATE` here is one of these:
+`METHOD` here is one of these:
 
-    SwitchLog.STATE_ANDROID   - log() will call android.util.Log.d() (e.g. for debug builds)
-    SwitchLog.STATE_PURE_JAVA - log() will call System.out.println() (e.g. for JUnit tests)
-    SwitchLog.STATE_OFF       - log() will not be called (e.g. for release builds)
+    SwitchLog.METHOD_OFF         - default / log() will not be called (e.g. for release builds)
+    SwitchLog.METHOD_ANDROID_LOG - log() will call android.util.Log.d() (e.g. for debug builds)
+    SwitchLog.METHOD_JAVA_PRINT  - log() will call System.out.println() (e.g. for JUnit tests)
     
 Start logging!
+    
+    SwitchLog.log()
+    sample output: MainActivity :: onCreate
+    
+    SwitchLog.log("hello")
+    sample output: MainActivity :: onCreate: hello
+    
+    SwitchLog.scream()
+    sample output: MainActivity :: onCreate: !!!!!!!!!!!!!!!!!!!!!!!!!
+    
+    SwitchLog.scream("hello")
+    sample output: MainActivity :: onCreate: !!!!!!!!!!!!!!!!!!!!!!!!! hello
